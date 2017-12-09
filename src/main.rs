@@ -1,55 +1,46 @@
+use std::collections::HashMap;
 use std::io::{self, Read};
 
-trait Anagrams {
-    fn is_anagram_of(&self, other: &Self) -> bool;
-}
+fn level6() {
+    let mut input = String::new();
 
-impl Anagrams for str {
-    fn is_anagram_of(&self, other: &str) -> bool {
-        if self.len() != other.len() {
-            return false;
+    io::stdin().read_to_string(&mut input).unwrap();
+
+    let mut banks: Vec<i32> = input
+        .trim()
+        .split_whitespace()
+        .map(|x| {
+            x.parse().expect(
+                format!("could not parse {:?}", x).as_str(),
+            )
+        })
+        .collect();
+    let mut steps = 0;
+    let mut seen: HashMap<Vec<i32>, i32> = HashMap::new();
+    while !seen.contains_key(&banks) {
+        seen.insert(banks.clone(), steps);
+        let mut max = 0;
+        let mut max_at = 0;
+        banks.iter().enumerate().for_each(
+            |(i, &bank)| if bank > max {
+                max = bank;
+                max_at = i;
+            },
+        );
+        banks[max_at] = 0;
+        let mut remaining = max;
+        let mut i = (max_at + 1) % banks.len();
+        while remaining > 0 {
+            banks[i] += 1;
+            remaining -= 1;
+            i = (i + 1) % banks.len();
         }
-
-        let mut self_chars: Vec<char> = self.chars().collect();
-        self_chars.sort();
-        let mut other_chars: Vec<char> = other.chars().collect();
-        other_chars.sort();
-
-        for char_pair in self_chars.iter().zip(other_chars.iter()) {
-            if char_pair.0 != char_pair.1 {
-                return false;
-            }
-        }
-
-        return true;
+        steps += 1;
     }
-}
 
-fn valid_passphrase(passphrase: &str) -> bool {
-    let words: Vec<&str> = passphrase.split_whitespace().collect();
-
-    for i in 0..words.len() {
-        for j in i + 1..words.len() {
-            if words[i].is_anagram_of(words[j]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-fn level4() {
-    let mut passphrases = String::new();
-
-    io::stdin().read_to_string(&mut passphrases).unwrap();
-    let mut num_good = 0;
-    for passphrase in passphrases.trim().split("\n") {
-        if valid_passphrase(passphrase.trim()) {
-            num_good += 1;
-        }
-    }
-    println!("num good: {}", num_good);
+    println!("loop size: {}", steps - seen.get(&banks).unwrap());
 }
 
 fn main() {
-    level4();
+    level6();
 }
