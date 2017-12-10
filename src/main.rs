@@ -32,7 +32,7 @@ fn level7() {
     io::stdin().read_to_string(&mut input).unwrap();
 
     let lines = input.trim().split("\n");
-    let re = Regex::new(r"(\w+) \((\d+)\)(:? -> )?((:?\w+)(:?, )?)*").unwrap();
+    let re = Regex::new(r"(\w+) \((\d+)\)(:? -> )?(:?(\w+)(:?, )?)*").unwrap();
     for line in lines {
         println!("line: {:?}", line);
         let captures = re.captures(line).unwrap();
