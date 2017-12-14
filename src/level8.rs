@@ -3,24 +3,6 @@ extern crate regex;
 use regex::Regex;
 use std::collections::HashMap;
 use std::io::{self, Read};
-use std::str::FromStr;
-
-enum Instruction {
-    Inc,
-    Dec,
-}
-
-impl FromStr for Instruction {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Instruction, ()> {
-        use Instruction::{Inc, Dec};
-        match s {
-            "inc" => Ok(Inc),
-            "dec" => Ok(Dec),
-            _ => Err(()),
-        }
-    }
-}
 
 fn level8() {
     let mut input = String::new();
