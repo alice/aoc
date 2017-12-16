@@ -1,57 +1,62 @@
-use std::cmp::min;
-use std::io::{self, Read};
+extern crate regex;
 
-fn level10() {
-    let num_elements: usize = 256;
-    let mut knot: Vec<i32> = Vec::new();
-    for i in 0..num_elements {
-        knot.push(i as i32);
-    }
-    let extra_lengths = [17, 31, 73, 47, 23];
-    let mut input = String::new();
-    io::stdin().read_to_string(&mut input).unwrap();
+use regex::{Regex, Captures};
+use std::collections::HashSet;
+use std::io;
 
-    let mut lengths = Vec::new();
-    lengths.extend_from_slice(input.trim().as_bytes());
-    lengths.extend_from_slice(&extra_lengths);
-    let lengths = lengths;
 
-    let mut current_idx: usize = 0;
-    let mut skip: usize = 0;
+fn level12() {
+    let mut line = String::new();
 
-    for _ in 0..64 {
-        let lengths_copy = lengths.clone();
-        for length in lengths_copy {
-            let mut to_reverse = Vec::new();
-            {
-                let virtual_subslice_end = current_idx + length as usize;
-                let mut subslice_end = min(virtual_subslice_end, num_elements);
-                to_reverse.extend_from_slice(knot.get(current_idx..subslice_end).unwrap());
-                subslice_end = virtual_subslice_end - subslice_end;
-                if subslice_end > 0 {
-                    to_reverse.extend_from_slice(knot.get(0..subslice_end).unwrap());
-                }
+    let mut programs: Vec<Vec<usize>> = Vec::new();
+    let line_re = Regex::new(r"(\d+) <-> ((?:\d+(?:, )?)+)?").unwrap();
+    while io::stdin().read_line(&mut line).unwrap() != 0 {
+        {
+            let captures_opt: Option<Captures> = line_re.captures(line.as_str());
+            if captures_opt.is_none() {
+                break;
             }
-            to_reverse.reverse();
-            for (i, v) in to_reverse.iter().enumerate() {
-                knot[((current_idx + i) % num_elements) as usize] = v.clone();
-            }
-            current_idx = (current_idx + length as usize + skip) % num_elements;
-            skip += 1;
+            let captures = captures_opt.unwrap();
+            let id: usize = captures[1].parse().unwrap();
+            let talks_to: Vec<usize> = captures[2]
+                .split(", ")
+                .map(|s| s.parse().unwrap())
+                .collect();
+            println!("line: {:?}, id: {}, talks_to: {:?}", line, id, talks_to);
+            programs.push(talks_to.clone());
+            assert_eq!(programs.len(), id + 1);
         }
+        line.clear();
     }
-    let mut hex: String = String::new();
-    for chunk in knot.chunks(16) {
-        println!("chunk: {:?}", chunk);
-        let xor = chunk.iter().fold(0, |acc, &x| acc ^ x);
-        println!("xor: {:?}", xor);
-        hex.push_str(format!("{:02x}", xor).as_str());
+
+    let mut seen: HashSet<usize> = HashSet::new();
+    let mut unseen: HashSet<usize> = HashSet::new();
+    for i in 0..programs.len() {
+        unseen.insert(i);
     }
-    assert_eq!(hex.len(), 32);
-    println!("{:?}", hex);
+    let mut groups = 0;
+
+    while unseen.len() > 0 {
+        let mut stack: Vec<usize>;
+        {
+            stack = programs[unseen.iter().next().unwrap().clone()].clone();
+        }
+        while stack.len() > 0 {
+            let program = stack.pop().unwrap();
+            if seen.contains(&program) {
+                continue;
+            }
+            seen.insert(program);
+            unseen.remove(&program);
+            let talks_to = &programs[program];
+            stack.extend_from_slice(&talks_to);
+        }
+        groups += 1;
+    }
+    println!("groups: {}", groups);
 
 }
 
 fn main() {
-    level10();
+    level12();
 }
