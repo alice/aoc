@@ -7,7 +7,6 @@ use std::str::Chars;
 struct State {
     stack_size: i32,
     count: i32,
-    garbage_count: i32,
 }
 
 impl State {
@@ -61,15 +60,11 @@ impl State {
     fn consume_garbage(&mut self, chars: &mut Chars) {
         let mut next = chars.next();
         while next != None {
-            self.garbage_count += match next.unwrap() {
-                '!' | '>' => 0,
-                _ => 1,
-            };
             next = match next.unwrap() {
                 '!' => chars.nth(1),
                 '>' => None,
                 _ => chars.next(),
-            };
+            }
         }
         self.end(chars);
     }
@@ -85,7 +80,6 @@ fn level9() {
         let mut chars: Chars = line.chars();
         state.consume_characters(&mut chars);
         println!("score: {}", state.count);
-        println!("garbage_count: {}", state.garbage_count);
     }
 }
 
