@@ -114,7 +114,6 @@ fn level19() {
     let mut chr_opt: Option<&char> = grid.char_at(&pos);
     let mut dir: Dir = Dir::Down;
     let mut seen: Vec<char> = Vec::new();
-    let mut steps = 0;
     while !chr_opt.is_none() {
         let chr = chr_opt.unwrap();
         if chr.is_alphabetic() {
@@ -124,10 +123,9 @@ fn level19() {
             dir = Dir::Unknown;
         }
         chr_opt = grid.find_next(&mut pos, &mut prev, &mut dir);
-        steps += 1;
     }
     let seen_str: String = seen.into_iter().collect();
-    println!("seen: {:?}; {} steps", seen_str, steps);
+    println!("seen: {:?}", seen_str);
 }
 
 fn main() {
