@@ -5,3 +5,4 @@ authors = ["Alice Boxhall <aboxhall@chromium.org>"]
 
 [dependencies]
 regex = "0.2"
+ndarray = "0.11.0"
